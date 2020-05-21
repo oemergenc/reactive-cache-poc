@@ -1,33 +1,20 @@
 package com.example.reactive
 
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 
-/**
- * Fake Customer Repository to demonstrate Caching
- */
 @Component
-class CustomerRepository {
+class CustomerRepository(val service: CustomerService) {
 
-    val logger = LoggerFactory.getLogger(this::class.java)
-
-    private val customers = mapOf(
-            1L to Customer(1, "Danny"),
-            2L to Customer(2, "Stephan"),
-            3L to Customer(3, "Thomas")
-    )
-
-    fun findById(id: Long): Customer? {
-        logger.info("Customer repository was called with $id")
-        Thread.sleep(3000) //its a BIG production table
-        logger.info("Returning value")
-        return customers[id]
+    fun getCustomers(): Flux<String> {
+        return service.customers()
+                .switchIfEmpty(service.customersIfEmpty())
     }
 
-    fun findAll() : List<Customer> {
-        logger.info("Customer repository was called for all Customers")
-        Thread.sleep(3000)
-        return customers.values.toList()
+    fun getDeferCustomers(): Flux<String> {
+        return service.customers()
+                .switchIfEmpty(Flux.defer {
+                    service.customersIfEmpty()
+                })
     }
-
 }

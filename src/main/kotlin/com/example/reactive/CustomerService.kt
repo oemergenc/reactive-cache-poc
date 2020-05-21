@@ -1,24 +1,20 @@
 package com.example.reactive
 
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 
 @Component
-class CustomerService(
-        val customerRepo: CustomerRepository,
-        cacheFactory: CacheFactory
-) {
+class CustomerService {
 
-    val customerCache = cacheFactory.getCacheProvider(Customer::class.java)
-
-    fun customerById(id: Long) = customerCache.forValue("customer:$id") {
-        customerRepo.findById(id)
+    fun customers(): Flux<String> {
+        val asList = listOf("sching", "schang", "schong")
+        return Flux.fromIterable(asList)
     }
 
-    fun customers() = customerCache.forCollection("customers") {
-        customerRepo.findAll()
+    fun customersIfEmpty(): Flux<String> {
+        val asList = listOf("tick", "trick", "track")
+        return Flux.fromIterable(asList)
     }
-
 }
 
 
